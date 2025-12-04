@@ -15,31 +15,35 @@ class MovieRepository(
 
     private val apiKey = "93a7d31a3a206784ee97fc7a7e92deef"
 
+    // Fungsi untuk UI (menggunakan Flow)
     fun fetchMovies(): Flow<List<Movie>> {
         return flow {
-            // 1. Ambil instance DAO dari database object
             val movieDao = movieDatabase.movieDao()
-
-            // 2. Ambil data lokal
             val savedMovies = movieDao.getMovies()
 
             if (savedMovies.isEmpty()) {
                 try {
-                    // Ambil dari API
                     val movies = movieService.getPopularMovies(apiKey).results
-
-                    // Simpan ke lokal
                     movieDao.addMovies(movies)
-
-                    // Emit data baru
                     emit(movies)
                 } catch (e: Exception) {
                     emit(emptyList())
                 }
             } else {
-                // Emit data lokal
                 emit(savedMovies)
             }
         }.flowOn(Dispatchers.IO)
+    }
+
+    // Fungsi ini suspend (bukan Flow) karena dipanggil direct oleh Worker
+    suspend fun fetchMoviesFromNetwork() {
+        try {
+            val movies = movieService.getPopularMovies(apiKey).results
+            // Simpan ke database (akan me-replace data lama karena OnConflictStrategy.REPLACE)
+            movieDatabase.movieDao().addMovies(movies)
+        } catch (e: Exception) {
+            // Jika gagal, throw error agar Worker tahu dan bisa retry
+            throw e
+        }
     }
 }
