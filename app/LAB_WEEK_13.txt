@@ -1,0 +1,28 @@
+1. Why is MVVM important? Which files represent Model, View, and ViewModel?
+Answer:
+MVVM (Model-View-ViewModel) is important because it separates the user interface (UI) from the business logic and data application. This separation makes the code cleaner, easier to maintain, easier to test, and allows developers to change the UI without rewriting the logic.
+
+Files in this project:
+- Model: Movie.kt, MovieDao.kt, MovieDatabase.kt, MovieRepository.kt (Handles data and business logic).
+- View: MainActivity.kt, activity_main.xml, RecyclerViewBinding.kt (Displays data to the user).
+- ViewModel: MovieViewModel.kt (Acts as a bridge, holding data for the UI and surviving configuration changes).
+
+2. In Part 1, you implemented Data Binding, why is this more efficient than using the normal method?
+Answer:
+Data Binding is more efficient because it eliminates the need for boilerplate code like `findViewById`. It allows the XML layout to bind directly to data objects in the ViewModel. This reduces the risk of NullPointerExceptions, improves performance by updating the UI automatically when data changes (observability), and keeps the Activity/Fragment code cleaner.
+
+3. In Part 2, you implemented the Singleton Pattern, why is this important?
+Answer:
+The Singleton Pattern is crucial for the Room Database (MovieDatabase.kt) because creating an instance of a database is very expensive in terms of performance and memory. We only need one instance of the database active for the entire application lifecycle to prevent memory leaks and ensure data consistency (preventing race conditions).
+
+4. In Part 2 & 3, you implemented the Repository Pattern, why is this important?
+Answer:
+The Repository Pattern serves as a "Single Source of Truth." It abstracts the data sources from the rest of the app. The ViewModel doesn't need to know whether the data comes from the Local Database (Room) or the Network (API). The Repository handles the logic of checking the local cache first and fetching from the network only if necessary, making the code modular and easier to manage.
+
+5. In part 3, you implemented the Worker Manager, is there another way to refresh your database with the latest data other than using Worker?
+Answer:
+Yes, there are other ways, although WorkManager is best for guaranteed background execution. Alternatives include:
+- AlarmManager: Can be used to trigger tasks at specific times (older approach).
+- Foreground Service: If the update is critical and the user needs to be aware of it.
+- Swipe-to-Refresh: Allowing the user to manually trigger a data refresh from the UI.
+- Lifecycle-aware polling: Using Coroutines/Handler to fetch data periodically only while the app is open (in onResume).
